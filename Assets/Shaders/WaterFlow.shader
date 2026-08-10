@@ -16,6 +16,12 @@ Shader "Custom/URP/WaterFlow"
         _NoiseTex ("Noise / Distortion Texture", 2D) = "gray" {}
         _Tiling ("Main Tiling (XY)", Vector) = (1, 1, 0, 0)
 
+        [Header(Normal Map)]
+        [Toggle(_ENABLE_NORMALMAP)] _EnableNormalMap ("Enable Normal Map", Float) = 1
+        _NormalMap ("Normal Map", 2D) = "bump" {}
+        _NormalStrength ("Normal Strength", Range(0, 2)) = 0.3
+        _NormalLightStrength ("Normal Light Strength", Range(0, 1)) = 0.5
+
         [Header(Flow)]
         _ScrollSpeed ("Scroll Speed (Y)", Float) = 0.5
         [Toggle(_ENABLE_DISTORTION)] _EnableDistortion ("Enable Distortion", Float) = 1
@@ -79,9 +85,11 @@ Shader "Custom/URP/WaterFlow"
             #pragma shader_feature_local _ENABLE_DISTORTION
             #pragma shader_feature_local _ENABLE_PT_MAIN
             #pragma shader_feature_local _PTMAINBLENDMODE_MULTIPLY _PTMAINBLENDMODE_ADD _PTMAINBLENDMODE_SCREEN
+            #pragma shader_feature_local _ENABLE_NORMALMAP
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -91,6 +99,8 @@ Shader "Custom/URP/WaterFlow"
             SAMPLER(sampler_NoiseTex);
             TEXTURE2D(_DissolveTex);
             SAMPLER(sampler_DissolveTex);
+            TEXTURE2D(_NormalMap);
+            SAMPLER(sampler_NormalMap);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _Tiling;
@@ -101,6 +111,9 @@ Shader "Custom/URP/WaterFlow"
                 float _DistortionStrength;
                 float _DistortionSpeed;
                 float4 _DistortionTiling;
+
+                float _NormalStrength;
+                float _NormalLightStrength;
 
                 half4 _CurrentColor;
                 half4 _TargetColor;
@@ -198,6 +211,18 @@ Shader "Custom/URP/WaterFlow"
                     #endif
 
                     finalColor.rgb = lerp(finalColor.rgb, ptMainResult, saturate(_PTMainColor.a));
+                #endif
+
+                // ---- Normal map: cheap ripple shading against the scene's main light ----
+                // Approximates the world normal for a flat water plane (up perturbed by the
+                // packed normal XY) instead of a full TBN, since there is no tangent input.
+                #if defined(_ENABLE_NORMALMAP)
+                    half3 normalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, mainUV), _NormalStrength);
+                    half3 approxNormalWS = normalize(half3(normalTS.x, 1.0, normalTS.y));
+                    Light mainLight = GetMainLight();
+                    half ndotl = saturate(dot(approxNormalWS, mainLight.direction));
+                    half normalLightTerm = lerp(1.0 - _NormalLightStrength, 1.0 + _NormalLightStrength, ndotl);
+                    finalColor.rgb *= normalLightTerm;
                 #endif
 
                 // ---- Scene depth via URP Camera Depth Texture ----

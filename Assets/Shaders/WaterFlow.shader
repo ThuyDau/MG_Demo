@@ -7,6 +7,12 @@ Shader "Custom/URP/WaterFlow"
     {
         [Header(Water Texture)]
         _MainTex ("Main Texture", 2D) = "white" {}
+        [Toggle(_ENABLE_PT_MAIN)] _EnablePTMain ("Enable PT Main", Float) = 1
+        _PT_Main ("PT Main", 2D) = "white" {}
+        _PTMainColor ("PT Main Color", Color) = (1, 1, 1, 1)
+        _PTMainTiling ("PT Main Tiling (XY)", Vector) = (1, 1, 0, 0)
+        _PTMainScrollSpeed ("PT Main Scroll Speed (Y)", Float) = 0.5
+        [KeywordEnum(Multiply, Add, Screen)] _PTMainBlendMode ("PT Main Blend Mode", Float) = 1
         _NoiseTex ("Noise / Distortion Texture", 2D) = "gray" {}
         _Tiling ("Main Tiling (XY)", Vector) = (1, 1, 0, 0)
 
@@ -29,6 +35,19 @@ Shader "Custom/URP/WaterFlow"
         _DepthFade ("Depth Fade Distance", Float) = 1.0
         _DepthPower ("Depth Power", Float) = 1.0
 
+        [Header(Foam Intersection Line)]
+        _FoamColor ("Foam Color", Color) = (1, 1, 1, 1)
+        _FoamDistance ("Foam Distance", Float) = 0.25
+        _FoamNoiseStrength ("Foam Noise Strength", Range(0, 10)) = 0.3
+
+        [Header(Dissolve)]
+        _DissolveTex ("Dissolve Texture", 2D) = "white" {}
+        _DissolveTiling ("Dissolve Tiling (XY)", Vector) = (1, 1, 0, 0)
+        _DissolveAmount ("Dissolve Amount", Range(0, 1)) = 0
+        _DissolveNoiseStrength ("Dissolve Noise Strength", Range(0, 10)) = 0.2
+        _DissolveEdgeWidth ("Dissolve Edge Width", Range(0.001, 1)) = 0.08
+        _DissolveEdgeColor ("Dissolve Edge Color", Color) = (1, 0.6, 0.1, 1)
+
         [Header(Visual)]
         _Alpha ("Alpha", Range(0, 1)) = 0.85
         _EmissionStrength ("Emission Strength", Float) = 0.0
@@ -49,7 +68,7 @@ Shader "Custom/URP/WaterFlow"
             Name "ForwardUnlit"
             Tags { "LightMode" = "UniversalForward" }
 
-            Cull Back
+            Cull Off
             ZWrite Off
             ZTest LEqual
             Blend SrcAlpha OneMinusSrcAlpha
@@ -58,18 +77,27 @@ Shader "Custom/URP/WaterFlow"
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature_local _ENABLE_DISTORTION
+            #pragma shader_feature_local _ENABLE_PT_MAIN
+            #pragma shader_feature_local _PTMAINBLENDMODE_MULTIPLY _PTMAINBLENDMODE_ADD _PTMAINBLENDMODE_SCREEN
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
+            TEXTURE2D(_PT_Main);
+            SAMPLER(sampler_PT_Main);
             TEXTURE2D(_NoiseTex);
             SAMPLER(sampler_NoiseTex);
+            TEXTURE2D(_DissolveTex);
+            SAMPLER(sampler_DissolveTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _Tiling;
                 float _ScrollSpeed;
+                half4 _PTMainColor;
+                float4 _PTMainTiling;
+                float _PTMainScrollSpeed;
                 float _DistortionStrength;
                 float _DistortionSpeed;
                 float4 _DistortionTiling;
@@ -83,6 +111,16 @@ Shader "Custom/URP/WaterFlow"
 
                 float _DepthFade;
                 float _DepthPower;
+
+                half4 _FoamColor;
+                float _FoamDistance;
+                float _FoamNoiseStrength;
+
+                float4 _DissolveTiling;
+                float _DissolveAmount;
+                float _DissolveNoiseStrength;
+                float _DissolveEdgeWidth;
+                half4 _DissolveEdgeColor;
 
                 float _Alpha;
                 float _EmissionStrength;
@@ -114,6 +152,14 @@ Shader "Custom/URP/WaterFlow"
                 float2 noiseUV = IN.uv * _DistortionTiling.xy + float2(0.0, _Time.y * _DistortionSpeed);
                 half4 noiseSample = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, noiseUV);
 
+                // ---- Dissolve: dedicated texture pattern with a glowing edge ----
+                float2 dissolveUV = IN.uv * _DissolveTiling.xy;
+                half dissolveSample = SAMPLE_TEXTURE2D(_DissolveTex, sampler_DissolveTex, dissolveUV).r;
+                float dissolveNoise = (noiseSample.b - 0.5) * _DissolveNoiseStrength;
+                float dissolveDiff = dissolveSample - _DissolveAmount + dissolveNoise;
+                clip(dissolveDiff);
+                float dissolveEdgeMask = 1.0 - smoothstep(0.0, max(_DissolveEdgeWidth, 0.001), dissolveDiff);
+
                 // ---- Water flow UV: continuous Y scroll ----
                 float2 mainUV = IN.uv * _Tiling.xy;
                 mainUV.y += _Time.y * _ScrollSpeed;
@@ -135,12 +181,39 @@ Shader "Custom/URP/WaterFlow"
                 half4 flowColor = lerp(_CurrentColor, _TargetColor, mask);
                 half4 finalColor = tex * flowColor;
 
-                // ---- Depth fade using URP Camera Depth Texture (soft intersection) ----
+                // ---- PT Main: independent pattern + own color, not tied to Current/Target ----
+                // _PTMainColor.a controls strength: 0 = no effect, 1 = full effect.
+                #if defined(_ENABLE_PT_MAIN)
+                    float2 ptMainUV = IN.uv * _PTMainTiling.xy;
+                    ptMainUV.y += _Time.y * _PTMainScrollSpeed;
+                    half3 ptMain = SAMPLE_TEXTURE2D(_PT_Main, sampler_PT_Main, ptMainUV).rgb * _PTMainColor.rgb;
+
+                    half3 ptMainResult;
+                    #if defined(_PTMAINBLENDMODE_ADD)
+                        ptMainResult = finalColor.rgb + ptMain;
+                    #elif defined(_PTMAINBLENDMODE_SCREEN)
+                        ptMainResult = 1.0 - (1.0 - finalColor.rgb) * (1.0 - ptMain);
+                    #else
+                        ptMainResult = finalColor.rgb * ptMain;
+                    #endif
+
+                    finalColor.rgb = lerp(finalColor.rgb, ptMainResult, saturate(_PTMainColor.a));
+                #endif
+
+                // ---- Scene depth via URP Camera Depth Texture ----
                 float2 screenUV = IN.positionCS.xy / _ScreenParams.xy;
                 float sceneRawDepth = SampleSceneDepth(screenUV);
                 float sceneEyeDepth = LinearEyeDepth(sceneRawDepth, _ZBufferParams);
                 float surfaceEyeDepth = LinearEyeDepth(IN.positionCS.z, _ZBufferParams);
                 float depthDiff = max(sceneEyeDepth - surfaceEyeDepth, 0.0);
+
+                // ---- Foam line where water intersects geometry, wobbled by noise ----
+                float foamNoise = (noiseSample.g - 0.5) * _FoamNoiseStrength;
+                float foamEdge = depthDiff + foamNoise;
+                float foamMask = 1.0 - smoothstep(0.0, max(_FoamDistance, 0.0001), foamEdge);
+                finalColor.rgb = lerp(finalColor.rgb, _FoamColor.rgb, foamMask * _FoamColor.a);
+
+                // ---- Depth fade for soft intersection alpha ----
                 float depthFade = saturate(depthDiff / max(_DepthFade, 0.0001));
                 depthFade = pow(depthFade, max(_DepthPower, 0.0001));
 
@@ -148,6 +221,9 @@ Shader "Custom/URP/WaterFlow"
 
                 // ---- Optional emission ----
                 finalColor.rgb += finalColor.rgb * _EmissionStrength;
+
+                // ---- Dissolve edge glow ----
+                finalColor.rgb += _DissolveEdgeColor.rgb * dissolveEdgeMask;
 
                 return half4(finalColor.rgb, alpha);
             }

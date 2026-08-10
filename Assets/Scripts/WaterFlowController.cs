@@ -18,10 +18,15 @@ public class WaterFlowController : MonoBehaviour
     [SerializeField] private float transitionSpeed = 1f;
     [SerializeField] private int startColorIndex = 0;
 
+    [Header("Dissolve")]
+    [Tooltip("Dissolve progress change per second (0..1 range). 0 = fully visible, 1 = fully dissolved.")]
+    [SerializeField] private float dissolveSpeed = 1f;
+
     private static readonly int CurrentColorID = Shader.PropertyToID("_CurrentColor");
     private static readonly int TargetColorID = Shader.PropertyToID("_TargetColor");
     private static readonly int TransitionID = Shader.PropertyToID("_Transition");
     private static readonly int TransitionSpeedID = Shader.PropertyToID("_TransitionSpeed");
+    private static readonly int DissolveAmountID = Shader.PropertyToID("_DissolveAmount");
 
     private MaterialPropertyBlock _mpb;
     private Color _currentColor;
@@ -30,8 +35,13 @@ public class WaterFlowController : MonoBehaviour
     private bool _isTransitioning;
     private int _currentColorIndex;
 
+    private float _dissolveAmount;
+    private float _dissolveTarget;
+    private bool _isDissolving;
+
     public int CurrentColorIndex => _currentColorIndex;
     public bool IsTransitioning => _isTransitioning;
+    public bool IsDissolved => _dissolveAmount >= 1f;
 
     private void Awake()
     {
@@ -85,23 +95,60 @@ public class WaterFlowController : MonoBehaviour
         ApplyToMaterial();
     }
 
+    /// <summary>
+    /// Dissolves the water away (e.g. call this when it has no color/is empty).
+    /// Animates smoothly from whatever the current dissolve amount is.
+    /// </summary>
+    public void Dissolve()
+    {
+        _dissolveTarget = 1f;
+        _isDissolving = true;
+    }
+
+    /// <summary>
+    /// Reverses the dissolve, bringing the water back to fully visible.
+    /// </summary>
+    public void Appear()
+    {
+        _dissolveTarget = 0f;
+        _isDissolving = true;
+    }
+
     private void Update()
     {
-        if (!_isTransitioning)
+        bool dirty = false;
+
+        if (_isTransitioning)
         {
-            return;
+            _transition += Time.deltaTime * transitionSpeed;
+
+            if (_transition >= 1f)
+            {
+                _transition = 1f;
+                _currentColor = _targetColor;
+                _isTransitioning = false;
+            }
+
+            dirty = true;
         }
 
-        _transition += Time.deltaTime * transitionSpeed;
-
-        if (_transition >= 1f)
+        if (_isDissolving)
         {
-            _transition = 1f;
-            _currentColor = _targetColor;
-            _isTransitioning = false;
+            _dissolveAmount = Mathf.MoveTowards(_dissolveAmount, _dissolveTarget, Time.deltaTime * dissolveSpeed);
+
+            if (Mathf.Approximately(_dissolveAmount, _dissolveTarget))
+            {
+                _dissolveAmount = _dissolveTarget;
+                _isDissolving = false;
+            }
+
+            dirty = true;
         }
 
-        ApplyToMaterial();
+        if (dirty)
+        {
+            ApplyToMaterial();
+        }
     }
 
     private void ApplyToMaterial()
@@ -116,6 +163,7 @@ public class WaterFlowController : MonoBehaviour
         _mpb.SetColor(TargetColorID, _targetColor);
         _mpb.SetFloat(TransitionID, _transition);
         _mpb.SetFloat(TransitionSpeedID, transitionSpeed);
+        _mpb.SetFloat(DissolveAmountID, _dissolveAmount);
         targetRenderer.SetPropertyBlock(_mpb);
     }
 }

@@ -13,6 +13,8 @@ namespace ColorMatch
         [Header("Movement")]
         [SerializeField] private float flySpeed = 4f;
         [SerializeField] private float arcHeight = 1f;
+        [Tooltip("Optional. If left empty, the bee doesn't rotate to face its flight direction at all.")]
+        [SerializeField] private BeeMovementSettings movementSettings;
 
         [Header("Target Search")]
         [Tooltip("How often to re-check for a free matching block if none was available yet.")]
@@ -137,7 +139,18 @@ namespace ColorMatch
                 float lerp = Mathf.Clamp01(t / duration);
                 Vector3 a = Vector3.Lerp(start, mid, lerp);
                 Vector3 b = Vector3.Lerp(mid, destination, lerp);
-                transform.position = Vector3.Lerp(a, b, lerp);
+                Vector3 nextPos = Vector3.Lerp(a, b, lerp);
+
+                Vector3 moveDir = nextPos - transform.position;
+                transform.position = nextPos;
+
+                if (movementSettings != null && moveDir.sqrMagnitude > 0.0001f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(moveDir.normalized, Vector3.up);
+                    transform.rotation = Quaternion.RotateTowards(
+                        transform.rotation, targetRotation, movementSettings.RotationSpeed * Time.deltaTime);
+                }
+
                 yield return null;
             }
 

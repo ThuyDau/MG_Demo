@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "MG_Demo.slnx"
+    "dotnet.defaultSolution": "Magic_Xit.slnx"
 }

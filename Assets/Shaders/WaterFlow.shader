@@ -32,10 +32,18 @@ Shader "Custom/URP/WaterFlow"
         [Header(Color Transition)]
         _CurrentColor ("Current Color", Color) = (0.8, 0.1, 0.1, 1)
         _TargetColor ("Target Color", Color) = (0.8, 0.1, 0.1, 1)
-        _Transition ("Transition Progress", Range(0, 1)) = 1
-        _TransitionSpeed ("Transition Speed (driven by controller)", Float) = 1
+        _Transition ("Transition Progress", Range(0.001, 1)) = 1
         _TransitionSoftness ("Transition Softness", Range(0.001, 1)) = 0.15
         _TransitionNoiseStrength ("Transition Noise Strength", Range(0, 1)) = 0.25
+        _ColorScrollSpeed ("Color Boundary Scroll Speed (Y, drives both transitions)", Float) = 0
+        _ColorTiling ("Color Band Tiling (Y)", Float) = 1
+
+        [Header(Color Transition 2 Target To Third)]
+        _ThirdColor ("Third Color", Color) = (0.8, 0.1, 0.1, 1)
+        _Transition2 ("Transition Progress 2", Range(0.001, 1)) = 0.001
+        _Transition2Softness ("Transition 2 Softness", Range(0.001, 1)) = 0.15
+        _Transition2NoiseStrength ("Transition 2 Noise Strength", Range(0, 1)) = 0.25
+        _ColorWrapSoftness ("Third-to-Current Wrap Softness", Range(0.001, 1)) = 0.15
 
         [Header(Depth)]
         _DepthFade ("Depth Fade Distance", Float) = 1.0
@@ -53,6 +61,7 @@ Shader "Custom/URP/WaterFlow"
         _DissolveNoiseStrength ("Dissolve Noise Strength", Range(0, 10)) = 0.2
         _DissolveEdgeWidth ("Dissolve Edge Width", Range(0.001, 1)) = 0.08
         _DissolveEdgeColor ("Dissolve Edge Color", Color) = (1, 0.6, 0.1, 1)
+        _DissolveScrollSpeed ("Dissolve Scroll Speed (Y)", Float) = 0
 
         [Header(Visual)]
         _Alpha ("Alpha", Range(0, 1)) = 0.85
@@ -118,9 +127,16 @@ Shader "Custom/URP/WaterFlow"
                 half4 _CurrentColor;
                 half4 _TargetColor;
                 float _Transition;
-                float _TransitionSpeed;
                 float _TransitionSoftness;
                 float _TransitionNoiseStrength;
+                float _ColorScrollSpeed;
+                float _ColorTiling;
+
+                half4 _ThirdColor;
+                float _Transition2;
+                float _Transition2Softness;
+                float _Transition2NoiseStrength;
+                float _ColorWrapSoftness;
 
                 float _DepthFade;
                 float _DepthPower;
@@ -134,6 +150,7 @@ Shader "Custom/URP/WaterFlow"
                 float _DissolveNoiseStrength;
                 float _DissolveEdgeWidth;
                 half4 _DissolveEdgeColor;
+                float _DissolveScrollSpeed;
 
                 float _Alpha;
                 float _EmissionStrength;
@@ -167,6 +184,7 @@ Shader "Custom/URP/WaterFlow"
 
                 // ---- Dissolve: dedicated texture pattern with a glowing edge ----
                 float2 dissolveUV = IN.uv * _DissolveTiling.xy;
+                dissolveUV.y += _Time.y * _DissolveScrollSpeed;
                 half dissolveSample = SAMPLE_TEXTURE2D(_DissolveTex, sampler_DissolveTex, dissolveUV).r;
                 float dissolveNoise = (noiseSample.b - 0.5) * _DissolveNoiseStrength;
                 float dissolveDiff = dissolveSample - _DissolveAmount + dissolveNoise;
@@ -184,14 +202,32 @@ Shader "Custom/URP/WaterFlow"
 
                 half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, mainUV);
 
-                // ---- Color flow transition mask: UV.y + TransitionProgress + Noise ----
+                // ---- Color flow transition: repeating band (Current -> Target -> Third) that tiles seamlessly and scrolls one direction ----
+                float colorPhase = frac(IN.uv.y * _ColorTiling + _Time.y * _ColorScrollSpeed);
+
                 float noiseInfluence = (noiseSample.r - 0.5) * _TransitionNoiseStrength;
-                float threshold = 1.0 - _Transition;
-                float edge = IN.uv.y - threshold + noiseInfluence;
+                float breakpoint1 = saturate(1.0 - _Transition);
+                float edge = colorPhase - breakpoint1 + noiseInfluence;
                 float halfSoft = max(_TransitionSoftness, 0.001) * 0.5;
                 float mask = smoothstep(-halfSoft, halfSoft, edge);
 
                 half4 flowColor = lerp(_CurrentColor, _TargetColor, mask);
+
+                // ---- Color flow transition 2: dissolves Target -> Third, clamped to the Target region of the same band ----
+                float noiseInfluence2 = (noiseSample.r - 0.5) * _Transition2NoiseStrength;
+                float breakpoint2 = saturate(1.0 - _Transition2);
+                float edge2 = colorPhase - breakpoint2 + noiseInfluence2;
+                float halfSoft2 = max(_Transition2Softness, 0.001) * 0.5;
+                float mask2 = smoothstep(-halfSoft2, halfSoft2, edge2) * mask;
+
+                flowColor = lerp(flowColor, _ThirdColor, mask2);
+
+                // ---- Soften the seam where Third wraps back to Current at colorPhase 1 -> 0 ----
+                float wrapDist = colorPhase > 0.5 ? colorPhase - 1.0 : colorPhase;
+                float halfSoftWrap = max(_ColorWrapSoftness, 0.001) * 0.5;
+                float wrapMask = 1.0 - smoothstep(0.0, halfSoftWrap, abs(wrapDist));
+                flowColor = lerp(flowColor, _CurrentColor, wrapMask);
+
                 half4 finalColor = tex * flowColor;
 
                 // ---- PT Main: independent pattern + own color, not tied to Current/Target ----

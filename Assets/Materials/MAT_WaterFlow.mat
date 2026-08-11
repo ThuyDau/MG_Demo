@@ -14,6 +14,7 @@ Material:
   m_ValidKeywords:
   - _ENABLE_DISTORTION
   - _ENABLE_NORMALMAP
+  - _ENABLE_PT_MAIN
   - _PTMAINBLENDMODE_ADD
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -69,53 +70,66 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
+    - _ColorScrollSpeed: 0.31
+    - _ColorScrollSpeed2: 0
+    - _ColorScrollTimeOffset: 0
+    - _ColorScrollTimeOffset2: 0
+    - _ColorTiling: 1
+    - _ColorWrapSoftness: 0.181
     - _DepthColorDistance: 2
-    - _DepthFade: 1.09
+    - _DepthFade: 10
     - _DepthPower: 0.45
     - _DissolveAmount: 0
     - _DissolveEdgeWidth: 0.001
     - _DissolveNoiseStrength: 0
+    - _DissolveScrollSpeed: 0
     - _DistortionSpeed: 0.1
     - _DistortionStrength: 0
     - _EdgeFoamDistance: 0.25
     - _EmissionStrength: 1
     - _EnableDistortion: 1
     - _EnableNormalMap: 1
-    - _EnablePTMain: 0
+    - _EnablePTMain: 1
     - _FoamDistance: -3.18
     - _FoamNoiseStrength: 6.57
     - _FresnelPower: 2.84
     - _FresnelStrength: 0.3
+    - _GlobalScrollSpeed: 0.69
     - _Glossiness: 0.5
     - _MainTexBlend: 0
     - _Metallic: 0
-    - _NormalLightStrength: 0.712
-    - _NormalStrength: 0.081
+    - _NormalLightStrength: 0.307
+    - _NormalStrength: 0.28
     - _PTMainBlendMode: 1
-    - _PTMainScrollSpeed: -1
+    - _PTMainScrollSpeed: 0.2
     - _PosterizeSteps: 6.66
-    - _ScrollSpeed: -1
+    - _ScrollSpeed: 1.02
     - _ScrollSpeed2: 0.5
-    - _Transition: 0.697
-    - _TransitionNoiseStrength: 0.75
-    - _TransitionSoftness: 0.084
-    - _TransitionSpeed: 1
+    - _Transition: 0.928
+    - _Transition2: 0.465
+    - _Transition2NoiseStrength: 0
+    - _Transition2Softness: 0.001
+    - _TransitionNoiseStrength: 0
+    - _TransitionSoftness: 0.001
+    - _TransitionSpeed: 0
     m_Colors:
     - White: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _CurrentColor: {r: 1, g: 0.8336842, b: 0.0990566, a: 1}
+    - _CurrentColor: {r: 0, g: 0.342857, b: 1, a: 1}
     - _CurrentDeepColor: {r: 1, g: 1, b: 1, a: 1}
     - _CurrentEdgeColor: {r: 1, g: 1, b: 1, a: 1}
-    - _DissolveEdgeColor: {r: 1, g: 0, b: 0, a: 1}
+    - _DissolveEdgeColor: {r: 0, g: 0.63304985, b: 1, a: 1}
     - _DissolveTiling: {r: 1, g: 1, b: 0, a: 0}
     - _DistortionTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamColor: {r: 1, g: 0, b: 0, a: 1}
     - _FresnelColor: {r: 1, g: 1, b: 1, a: 1}
-    - _PTMainColor: {r: 1, g: 1, b: 1, a: 0.03529412}
+    - _MiddleColor: {r: 0.8, g: 0.09999997, b: 0.09999997, a: 1}
+    - _PTMainColor: {r: 1, g: 1, b: 1, a: 0.07058824}
     - _PTMainTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _TargetColor: {r: 0.8, g: 0.1, b: 0.1, a: 1}
+    - _TargetColor: {r: 1, g: 0, b: 0.038758278, a: 1}
     - _TargetDeepColor: {r: 1, g: 0, b: 0, a: 1}
     - _TargetEdgeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ThirdColor: {r: 0.9433962, g: 0.72759455, b: 0.11124954, a: 1}
     - _Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Tiling2: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []

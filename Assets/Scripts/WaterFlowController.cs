@@ -25,7 +25,6 @@ public class WaterFlowController : MonoBehaviour
     private static readonly int CurrentColorID = Shader.PropertyToID("_CurrentColor");
     private static readonly int TargetColorID = Shader.PropertyToID("_TargetColor");
     private static readonly int TransitionID = Shader.PropertyToID("_Transition");
-    private static readonly int TransitionSpeedID = Shader.PropertyToID("_TransitionSpeed");
     private static readonly int DissolveAmountID = Shader.PropertyToID("_DissolveAmount");
 
     private MaterialPropertyBlock _mpb;
@@ -162,7 +161,6 @@ public class WaterFlowController : MonoBehaviour
         _mpb.SetColor(CurrentColorID, _currentColor);
         _mpb.SetColor(TargetColorID, _targetColor);
         _mpb.SetFloat(TransitionID, _transition);
-        _mpb.SetFloat(TransitionSpeedID, transitionSpeed);
         _mpb.SetFloat(DissolveAmountID, _dissolveAmount);
         targetRenderer.SetPropertyBlock(_mpb);
     }

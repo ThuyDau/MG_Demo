@@ -8,14 +8,16 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MAT_WaterFlow
-  m_Shader: {fileID: 4800000, guid: edf53bbc9fd006a7dc6d6645a477c134, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
+  m_Shader: {fileID: 4800000, guid: 054bf4c4054208483add64989aa2eb28, type: 3}
+  m_Parent: {fileID: 2100000, guid: 22b0ec2e6b4b5b32edc03f4477b2e48a, type: 2}
+  m_ModifiedSerializedProperties: 8
+  m_ValidKeywords: []
+  m_InvalidKeywords:
   - _ENABLE_DISTORTION
+  - _ENABLE_FOAM
   - _ENABLE_NORMALMAP
+  - _ENABLE_WOBBLE
   - _PTMAINBLENDMODE_ADD
-  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -26,97 +28,20 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _DissolveTex:
-        m_Texture: {fileID: 2800000, guid: f763b45ba8f47e243937cd7a2f4da94d, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 0234d2c628065814ba1adbdfa138d0d1, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex2:
-        m_Texture: {fileID: 2800000, guid: f32e14033cf0aff499a94643153b3e48, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _NoiseTex:
         m_Texture: {fileID: 2800000, guid: ca0d94943ae959d44818dc31f0bce1ac, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: ea9303661ed442b4e955d77524a75c33, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _PT_Main:
-        m_Texture: {fileID: 2800000, guid: 4e6ba503c8d0da84eb7f7b93f3becfce, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Texture2D:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_Lightmaps:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_LightmapsInd:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_ShadowMasks:
-        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Alpha: 1
-    - _DepthColorDistance: 2
-    - _DepthFade: 1.09
-    - _DepthPower: 0.45
-    - _DissolveAmount: 0
-    - _DissolveEdgeWidth: 0.001
-    - _DissolveNoiseStrength: 0
-    - _DistortionSpeed: 0.1
-    - _DistortionStrength: 0
-    - _EdgeFoamDistance: 0.25
-    - _EmissionStrength: 1
-    - _EnableDistortion: 1
-    - _EnableNormalMap: 1
-    - _EnablePTMain: 0
-    - _FoamDistance: -3.18
-    - _FoamNoiseStrength: 6.57
-    - _FresnelPower: 2.84
-    - _FresnelStrength: 0.3
-    - _Glossiness: 0.5
-    - _MainTexBlend: 0
-    - _Metallic: 0
-    - _NormalLightStrength: 0.712
-    - _NormalStrength: 0.081
-    - _PTMainBlendMode: 1
-    - _PTMainScrollSpeed: -1
-    - _PosterizeSteps: 6.66
-    - _ScrollSpeed: -1
-    - _ScrollSpeed2: 0.5
-    - _Transition: 0.697
-    - _TransitionNoiseStrength: 0.75
-    - _TransitionSoftness: 0.084
-    - _TransitionSpeed: 1
+    - _FresnelPower: 2.73
+    - _SpecIntensity: 2.573
+    - _SpecPower: 117
     m_Colors:
-    - White: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _CurrentColor: {r: 1, g: 0.8336842, b: 0.0990566, a: 1}
-    - _CurrentDeepColor: {r: 1, g: 1, b: 1, a: 1}
-    - _CurrentEdgeColor: {r: 1, g: 1, b: 1, a: 1}
-    - _DissolveEdgeColor: {r: 1, g: 0, b: 0, a: 1}
-    - _DissolveTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _DistortionTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
-    - _FresnelColor: {r: 1, g: 1, b: 1, a: 1}
-    - _PTMainColor: {r: 1, g: 1, b: 1, a: 0.03529412}
-    - _PTMainTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _TargetColor: {r: 0.8, g: 0.1, b: 0.1, a: 1}
-    - _TargetDeepColor: {r: 1, g: 0, b: 0, a: 1}
-    - _TargetEdgeColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _Tiling2: {r: 1, g: 1, b: 0, a: 0}
+    - _ColorBottom: {r: 0.14999998, g: 0.45, b: 0.9, a: 1}
+    - _ColorTop: {r: 0.39999998, g: 0.75, b: 1, a: 0.85}
+    - _FresnelColor: {r: 1, g: 0, b: 0, a: 1}
+    - _SpecColor: {r: 1, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

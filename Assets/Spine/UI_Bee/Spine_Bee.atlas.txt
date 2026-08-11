@@ -1,0 +1,17 @@
+Spine_Bee.png
+size:1760,560
+filter:Linear,Linear
+scale:0.3
+beehive
+bounds:365,2,362,300
+rotate:180
+beehive_cut
+bounds:2,2,362,300
+rotate:180
+leaves_back
+bounds:2,304,1755,251
+offsets:6,6,1766,257
+leaves_front
+bounds:729,170,357,132
+offsets:3,3,361,135
+rotate:180

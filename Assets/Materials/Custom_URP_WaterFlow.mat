@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Custom_URP_WaterFlow
+  m_Shader: {fileID: 4800000, guid: edf53bbc9fd006a7dc6d6645a477c134, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _ENABLE_DISTORTION
+  - _ENABLE_NORMALMAP
+  - _PTMAINBLENDMODE_ADD
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _DissolveTex:
+        m_Texture: {fileID: 2800000, guid: f763b45ba8f47e243937cd7a2f4da94d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 41b5f47e846bb5b46b59d7fa01e40a1e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 2800000, guid: ca0d94943ae959d44818dc31f0bce1ac, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: ccd92f681b5f986439de31f4d9087f7a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PT_Main:
+        m_Texture: {fileID: 2800000, guid: 4e6ba503c8d0da84eb7f7b93f3becfce, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _DepthFade: 0.51
+    - _DepthPower: -14.59
+    - _DissolveAmount: 0
+    - _DissolveEdgeWidth: 0.001
+    - _DissolveNoiseStrength: 0.03
+    - _DistortionSpeed: 0.5
+    - _DistortionStrength: 0.21
+    - _EmissionStrength: 0
+    - _EnableDistortion: 1
+    - _EnableNormalMap: 1
+    - _EnablePTMain: 0
+    - _FoamDistance: 0.88
+    - _FoamNoiseStrength: 0
+    - _NormalLightStrength: 0.388
+    - _NormalStrength: 1.237
+    - _PTMainBlendMode: 1
+    - _PTMainScrollSpeed: -12.17
+    - _ScrollSpeed: 0.5
+    - _Transition: 0
+    - _TransitionNoiseStrength: 0.562
+    - _TransitionSoftness: 0.377
+    - _TransitionSpeed: 1
+    m_Colors:
+    - _CurrentColor: {r: 1, g: 0.5476825, b: 0, a: 1}
+    - _DissolveEdgeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DissolveTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _DistortionTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _FoamColor: {r: 1, g: 0.15566039, b: 0.15566039, a: 1}
+    - _PTMainColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PTMainTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _TargetColor: {r: 1, g: 0.4777117, b: 0.24056602, a: 1}
+    - _Tiling: {r: 1, g: 1, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
